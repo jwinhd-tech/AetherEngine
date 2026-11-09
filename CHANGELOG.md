@@ -22,14 +22,6 @@ _Nothing yet._
   so a host playing a recording still in progress as a live source, with the whole recording as the rewind
   buffer, lost its start. An explicit budget now replaces the 2 GiB default; the quarter-of-free-space clamp,
   the claims of other sessions and the 64 MiB floor still apply, and nil keeps today's sizing.
-- **DTS:X IMAX tracks keep their heights.** The alternate DTS:X presentations (FFmpeg labels some "DTS-HD MA +
-  DTS:X IMAX") carry the same four fixed heights as the standard one, after one to five object channels, and
-  were refused and played as their 7.1 bed. FFmpegBuild 3.14.0's `x_heights` now decodes their height channel
-  set too (the objects are never decoded and stay in the bed), and `DTSXObjectAudioDecoder` renders them through
-  the same bed regression, folded at their profile's gain read from the decoder's new `x_presentation`: D0 at
-  unity, D1 and D3 at -3 dB. D4, whose fold has not been measured, is still refused. On *Bad Boys for Life* (D0)
-  every frame of a 60 s excerpt decoded its heights with the bed bit-identical to the plain 7.1 decode. Needs
-  FFmpegBuild 3.14.0.
 
 ### Fixed
 
@@ -296,13 +288,6 @@ _Nothing yet._
   seven DTS:X films the heights stayed within 0.14 dB at a correlation of 0.994 and above wherever
   they carry 0.3 % of the energy or more, 29 to 49 dB overall. Folded beds use an energy bound of 0.5
   to 2.5 times the bed. Needs FFmpegBuild 3.13.0, whose `x_heights` no longer subtracts the fold.
-
-- **Object audio can no longer mix an element signal into an output.** The object renderer is now
-  `ObjectAudioPlacement`: it keeps each element's gains towards the layout from its metadata and
-  mixes no audio, and metadata ramps are gone with it (updates already applied as jumps). A block
-  that arrives without its bed plays as silence, for every decoder; the path that panned element
-  signals onto the speakers, which neither the TrueHD nor the DTS:X decoder reached any more, is
-  removed from the build.
 
 ### Fixed
 

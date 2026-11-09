@@ -390,7 +390,7 @@ extension HLSVideoEngine {
             let rendering: String
             switch source {
             case .trueHDAtmos:
-                rendering = "the stream's channel presentation regressed onto \(layout.rawValue) by its objects"
+                rendering = "objects rendered into \(layout.rawValue)"
             case .dtsHDMasterAudio:
                 rendering = "bed and heights routed one to one into \(layout.rawValue)"
             }
