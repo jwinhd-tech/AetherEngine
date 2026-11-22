@@ -569,6 +569,13 @@ The host uses the existing `forwardBufferSegments` clamp and the native session 
 - Byte and forward-time thresholds stop prefetch, with bounded slack for protected chunks and a single record.
 - Old consumed chunks can be reclaimed exactly at the budget boundary, so refilling cannot deadlock.
 
+### Sharing the source link
+
+**The producer claims the source link while it reads (#240).** It reports to the engine's side-reader link gate, as the native segment producer does, so a subtitle side reader yields to a software session too. Rules: [Sharing the link with video](architecture-native.md#sharing-the-link-with-video-240).
+
+- The claim is taken before a source read and released before every park, and when the producer ends.
+- Before, a software session (the Dolby Vision FEL route, DVDs, the software codecs) never claimed the link, so the side reader read beside it for the whole session ([measured](measurements.md#subtitle-side-reader-link-sharing)).
+
 ### Coverage frontier
 
 The cache frontier is how far ahead of the playhead the cache provably holds playable media. It is the intersection of the selected audio and video presentation coverage that contains the playhead.

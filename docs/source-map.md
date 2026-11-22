@@ -417,7 +417,7 @@ On-demand MPEG-DASH (AE#859): one static Period, each representation a single `S
 | `SoftwareNowPlaying.swift` | The Now-Playing publisher every engine-owned route uses: state-to-card mapping, remote-command routing (track commands included) and the sink, behind small protocols for the info and command centers so tests run on fakes. Undoes only its own changes at stop. |
 | `NowPlayingArbiter.swift` | Which engine in the process holds the shared Now-Playing centers: the last one to claim (start playing, or `claimNowPlaying()`); waiting engines take over in claim order. |
 | `StartupReadinessGate.swift` | Outcome of one startup-readiness attempt: the reloaded item became playable, died, or ran out the settle window without doing either. |
-| `SoftwarePacketReadAhead.swift` | Software VOD: compressed packet prefetch decoupled from renderer pacing; cached seeks move only the consumer cursor. See [Software VOD compressed packet cache](architecture-software.md#software-vod-compressed-packet-cache). |
+| `SoftwarePacketReadAhead.swift` | Software VOD: compressed packet prefetch decoupled from renderer pacing; cached seeks move only the consumer cursor. Its producer claims the side-reader link while it reads (#240). See [Software VOD compressed packet cache](architecture-software.md#software-vod-compressed-packet-cache). |
 | `SoftwarePacketStore.swift` | The store protocol the read-ahead uses, implemented by the disk and memory FIFOs. |
 | `SoftwarePacketDiskFIFO.swift` | Session-owned, disk-backed FIFO of compressed-packet records. |
 | `SoftwarePacketMemoryFIFO.swift` | The same store in purgeable memory, used on tvOS. |

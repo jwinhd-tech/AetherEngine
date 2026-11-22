@@ -10,7 +10,15 @@ the public-API contract.
 
 ## [Unreleased]
 
-_Nothing yet._
+### Fixed
+
+- **A subtitle side reader yields to software sessions too (#240).** The side reader leaves the source
+  link to the video path while it fetches, but only the native segment producer ever claimed the link.
+  On a software session (the Dolby Vision FEL route, DVDs, the software codecs) the side reader read
+  beside the playback reader for the whole session, and on Matroska it reads a second full copy of the
+  stream. Against an origin that served two readers of one file at 9.5 MiB/s each, a 100 Mbit/s FEL
+  remux rebuffered about 30 s after every seek. The software host's packet read-ahead now claims the
+  link while its producer reads, as the native producer does.
 
 ## [7.69.0] - 2026-11-16
 

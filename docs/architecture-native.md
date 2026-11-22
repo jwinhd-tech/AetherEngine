@@ -625,6 +625,8 @@ On Matroska the side reader downloads a second full copy of the stream: `matrosk
 - keeps a bounded grace window after each anchor so a freshly selected track still fills,
 - takes the link back after a 60 s continuous yield, so a pump that never parks cannot disable lookahead for the session.
 
+The video path is either route's producer. The native segment producer and the software host's packet read-ahead both claim the link while they read from the source ([Sharing the source link](architecture-software.md#sharing-the-source-link)).
+
 Bench result: [measurements.md, Subtitle side reader link sharing](measurements.md#subtitle-side-reader-link-sharing).
 
 ### Ending a PGS cue

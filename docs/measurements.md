@@ -634,6 +634,15 @@ Current rule: [architecture-native.md › Sharing the link with video](architect
 
 Measured on a bench with 1.4x link headroom: giving video priority over the subtitle side reader improved far-seek landings about 45% at the median and halved the side reader's share of the link.
 
+**Software sessions (2026-11-22, fork `exact-heights`).** A 100 Mbit/s Dolby Vision FEL Matroska remux on the software route, PGS subtitles on, against a Jellyfin origin on a USB hard drive:
+
+| Readers of the file at once | Each reader |
+|---|---|
+| one | 38.8 MiB/s |
+| two (200 MB apart) | 9.5 MiB/s |
+
+The software route never claimed the link, so after every seek the side reader read beside the playback reader. The playback reader got 8 to 16 MiB/s against the stream's 11.9 and rebuffered about 30 s after each seek. A run with no seek started no side reader and played clean.
+
 ### Subtitle cue pipeline reports
 
 Field reports behind the subtitle cue pipeline: each paragraph below names the rule a report set and what the viewer saw before it (the "report:" figures).
