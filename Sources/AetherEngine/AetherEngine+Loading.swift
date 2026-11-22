@@ -2108,6 +2108,9 @@ extension AetherEngine {
         host.configuredDVProfile = sourceDVProfile
         host.dolbyVisionHandling = loadedOptions.dolbyVisionHandling
         host.preferDualLayerDolbyVision = loadedOptions.preferDualLayerDolbyVision
+        // #240: the native session gets the same gate; without it a subtitle side reader never
+        // yields to a software session.
+        host.sideReaderLinkGate = sideReaderLinkGate
         host.upscalePlan = upscaleRebuild.plan
         let processingRebuild = VideoProcessingRouteDecision.forRebuild(
             sessionPlan: sourceVideoProcessingPlan, optionOn: loadedOptions.videoProcessing != nil,

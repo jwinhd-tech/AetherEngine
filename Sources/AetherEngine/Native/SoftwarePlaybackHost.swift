@@ -213,6 +213,11 @@ final class SoftwarePlaybackHost {
     /// Opt-in to full dual-layer Dolby Vision (Profile 7 FEL) decoding and Metal GPU composition over single-layer fallback.
     var preferDualLayerDolbyVision: Bool = false
 
+    /// #240: the engine's side-reader link gate, set by the load before `load(demuxer:...)`. The VOD
+    /// packet read-ahead reports its source reads to it, so a subtitle side reader yields to this
+    /// session as it does to the native route's segment producer.
+    var sideReaderLinkGate: SideReaderLinkGate?
+
     /// #846: set by the load before `load(demuxer:...)`; non-nil runs the upscale stage on every decoded frame.
     var upscalePlan: UpscalePlan?
 
@@ -1751,6 +1756,7 @@ final class SoftwarePlaybackHost {
             let initialSourceClock = initialClockTime.seconds
             let videoReorderDepth = Self.presentationReorderDepth(codecID: vCodecID)
             let anchorsOnLastKeyframe = snapsSeeksToKeyframes
+            let linkGate = sideReaderLinkGate
             let cacheResult = await BlockingWork.detached(priority: .utility) { () throws -> (SoftwarePacketReadAhead, RetentionClaims.Claim?)? in
                 let segments = HLSVideoEngine.clampedForwardWindow(forwardBufferSegments)
                 guard let (fifo, bytes, claim) = try Self.makePacketStore(
@@ -1761,7 +1767,8 @@ final class SoftwarePlaybackHost {
                     forwardSeconds: Double(segments) * 4,
                     initialSourceClock: initialSourceClock, fifo: fifo,
                     videoReorderDepth: videoReorderDepth, cacheTiming: cacheTiming,
-                    anchorsOnLastKeyframe: anchorsOnLastKeyframe
+                    anchorsOnLastKeyframe: anchorsOnLastKeyframe,
+                    linkGate: linkGate
                 ) { isCurrent in
                     guard let packet = try dem.readPacket(isCurrent: isCurrent) else { return nil }
                     defer { av_packet_unref(packet); av_packet_free_safe(packet) }

@@ -138,6 +138,14 @@ final class SoftwarePacketReadAhead: @unchecked Sendable {
     /// keyframe of 4K AV1 held the clock 1.8 to 2.5 s, and 0.13 to 0.18 s restored to that keyframe.
     private let anchorsOnLastKeyframe: Bool
     private var calibrationPressure = false
+    /// #240: told when this producer starts and stops pulling from the source, so a subtitle side
+    /// reader of the same source leaves the link to it. The native route's segment producer reports
+    /// the same way; before this a software session (the Dolby Vision FEL route, DVDs, the software
+    /// codecs) never claimed the link, and on Matroska the side reader is a second full copy of the
+    /// stream. Measured on a 100 Mbit/s FEL remux whose origin serves two readers of one file at
+    /// 9.5 MiB/s each: the playback reader fell below the media rate and rebuffered about 30 s after
+    /// every seek.
+    private let linkGate: SideReaderLinkGate?
 
     /// Construct only off-main: creating the FIFO touches the temporary volume.
     init(video: Stream, audio: Stream?, byteBudget: Int, forwardSeconds: Double,
@@ -147,8 +155,10 @@ final class SoftwarePacketReadAhead: @unchecked Sendable {
          coverageRangeCap: Int = 4096,
          anchorsOnLastKeyframe: Bool = false,
          forwardOnly: Bool = false,
+         linkGate: SideReaderLinkGate? = nil,
          beforeConsumerOperation: (@Sendable () -> Void)? = nil,
          readSource: @escaping @Sendable (@Sendable () -> Bool) throws -> SoftwareStoredPacket?) {
+        self.linkGate = linkGate
         self.cacheTiming = forwardOnly ? nil : cacheTiming
         self.forwardOnly = forwardOnly
         self.anchorsOnLastKeyframe = anchorsOnLastKeyframe
@@ -617,14 +627,27 @@ final class SoftwarePacketReadAhead: @unchecked Sendable {
         // waiting on the first packet it delivers.
         applyProducerQoS(QOS_CLASS_USER_INITIATED, reservoir: nil, waiting: 0)
         defer { try? fifo.close() }
+        // #240: the link claim follows the park. Released before every wait and on exit, taken
+        // before the next source read. The gate's own lock is a leaf (it never calls out), so taking
+        // it under `condition` cannot invert with anything.
+        var claimsLink = false
+        defer { if claimsLink { linkGate?.videoFetchEnded() } }
         while true {
             condition.lock()
             while !closed && !resetPending && (sourceRepositioning || ended || failure != nil || shouldParkLocked()) {
+                if claimsLink {
+                    linkGate?.videoFetchEnded()
+                    claimsLink = false
+                }
                 producerParked = true
                 condition.wait()
             }
             producerParked = false
             if closed { condition.unlock(); return }
+            if !claimsLink {
+                linkGate?.videoFetchBegan()
+                claimsLink = true
+            }
             let token = sourceEpoch
             let reset = resetPending
             let reservoir = reservoirSecondsLocked()

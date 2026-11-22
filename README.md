@@ -4,7 +4,7 @@
 
 <h1 align="center">AetherEngine</h1>
 
-> **This fork** (`jwinhd-tech/AetherEngine`, branch `exact-heights`) is upstream AetherEngine with the 7.57.0 object audio change reverted: TrueHD Atmos and DTS:X heights render exactly, as in 7.56.0 (`ObjectAudioRenderer`, LibTrueHD 3.1.0, FFmpegBuild 3.12.1). Where the docs describe `BedRegression` or `ObjectAudioPlacement`, they describe upstream, not this branch.
+> **This fork** (`jwinhd-tech/AetherEngine`, branch `exact-heights`) is upstream AetherEngine with the 7.57.0 object audio change reverted: TrueHD Atmos and DTS:X heights render exactly, as in 7.56.0 (`ObjectAudioRenderer`, LibTrueHD 3.1.0, FFmpegBuild 3.12.1). Where the docs describe `BedRegression` or `ObjectAudioPlacement`, they describe upstream, not this branch. It also has software VOD sessions (the Dolby Vision FEL route, DVDs, the software codecs) report their source reads to the #240 side-reader link gate, so a subtitle side reader yields to them as it does to the native route.
 
 <p align="center">
   <b>A media player engine for Apple platforms.</b><br>
